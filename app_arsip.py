@@ -1,9 +1,9 @@
 """Pemindai Arsip -> Excel
 
 Cara pakai:
-  1. Instal Tesseract OCR (sertakan paket bahasa Indonesia "ind")
-  2. pip install streamlit pytesseract pillow pandas openpyxl pymupdf opencv-python-headless
-  3. streamlit run app_arsip.py
+1. Instal Tesseract OCR (sertakan paket bahasa Indonesia "ind")
+2. pip install streamlit pytesseract pillow pandas openpyxl pymupdf opencv-python-headless
+3. streamlit run app_arsip.py
 """
 import io
 import re
@@ -109,6 +109,7 @@ def ekstrak(teks):
         m = re.search(pola_nomor, teks)
         if m:
             nomor = m.group(0).strip()
+
     uraian = ""
     cocok_uraian = list(
         re.finditer(
