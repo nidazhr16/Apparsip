@@ -113,14 +113,16 @@ def ekstrak(teks):
     uraian = ""
     cocok_uraian = list(
         re.finditer(
-            r"\bura[il1]an\b[^\n]*(?:\n[^\n]*){0,5}",
+            r"(?:^|\n)[^\n]*\bur[aei]i?[aeil]n\b[^\n]*(?:\n[^\n]*){0,5}",
             teks,
             re.I,
         )
     )
     if cocok_uraian:
         potongan = cocok_uraian[-1].group(0)
-        potongan = re.sub(r"^\s*ura[il1]an\b", "", potongan, flags=re.I)
+        # Hapus bagian label sebelum/pada kata uraian sampai tanda pemisah (: atau -) atau spasi panjang
+        potongan = re.sub(r"^.*?ur[aei]i?[aeil]n\b[^\n:;\-=]*[:;\-=]?\s*", "", potongan, flags=re.I | re.S)
+        # Hentikan jika sudah masuk catatan kaki / tanda tangan / NIP di bagian bawah dokumen SPM
         potongan = re.split(
             r"\n\s*(?:[•\*\-]\s*)?(?:semua\s+bukti|kebenaran\s+perhitungan|jakarta[,\s]|a\.n\.|kuasa\s+pengguna|pejabat\s+penandatangan|nip\.?|233\s+\d+)\b",
             potongan,
@@ -130,7 +132,6 @@ def ekstrak(teks):
         potongan = re.sub(r"^[\s:=\-–—.]+", "", potongan)
         uraian = " ".join(potongan.split())
     return nomor, uraian
-
 
 def halaman(f):
     if f.name.lower().endswith(".pdf"):
