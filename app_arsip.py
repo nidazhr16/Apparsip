@@ -110,9 +110,21 @@ def ekstrak(teks):
         if m:
             nomor = m.group(0).strip()
     uraian = ""
-    m = re.search(r"\b(?:uraian|perihal)\s*[:\-]\s*(.+(?:\n(?!\s*\n).+){0,2})", teks, re.I)
+    m = re.search(
+        r"\b(?:uraian(?:\s+informasi)?|perihal|hal|tentang|pokok\s+masalah|isi\s+ringkas)\s*[:\-=.]?\s*(.+?)(?=\n\s*\n|\n\s*(?:nomor|tanggal|lampiran|kepada|yth|tembusan)\b|\Z)",
+        teks,
+        re.I | re.S,
+    )
     if m:
         uraian = " ".join(m.group(1).split())
+    else:
+        baris_bersih = [
+            " ".join(b.split())
+            for b in teks.splitlines()
+            if len(" ".join(b.split())) >= 25
+        ]
+        if baris_bersih:
+            uraian = " ".join(baris_bersih[:2])
     return nomor, uraian
 
 
