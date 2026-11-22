@@ -1,7 +1,8 @@
-streamlit 
-pytesseract 
-pillow 
-pandas 
-openpyxl 
-pymupdf 
+streamlit
+pandas
+pytesseract
+openpyxl
+Pillow
+PyMuPDF
 opencv-python-headless
+numpy
