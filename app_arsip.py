@@ -113,15 +113,22 @@ def ekstrak(teks):
     uraian = ""
     cocok_uraian = list(
         re.finditer(
-            r"\bura[il]an\b[^\S\r\n]*[:\-=.]?[^\S\r\n]*(.+?)(?=\n\s*\n|\n\s*(?:•|\*|catatan|semua\s+bukti|kebenaran\s+perhitungan|jakarta,|a\.n\.|nip\.|233\s+\d+)\b|\Z)",
+            r"\bura[il1]an\b[^\n]*(?:\n[^\n]*){0,5}",
             teks,
-            re.I | re.S,
+            re.I,
         )
     )
     if cocok_uraian:
-        teks_uraian = cocok_uraian[-1].group(1).strip()
-        teks_uraian = re.sub(r"^[:\-=.\s]+", "", teks_uraian)
-        uraian = " ".join(teks_uraian.split())
+        potongan = cocok_uraian[-1].group(0)
+        potongan = re.sub(r"^\s*ura[il1]an\b", "", potongan, flags=re.I)
+        potongan = re.split(
+            r"\n\s*(?:[•\*\-]\s*)?(?:semua\s+bukti|kebenaran\s+perhitungan|jakarta[,\s]|a\.n\.|kuasa\s+pengguna|pejabat\s+penandatangan|nip\.?|233\s+\d+)\b",
+            potongan,
+            maxsplit=1,
+            flags=re.I,
+        )[0]
+        potongan = re.sub(r"^[\s:=\-–—.]+", "", potongan)
+        uraian = " ".join(potongan.split())
     return nomor, uraian
 
 
@@ -142,6 +149,8 @@ def proses(nama, img):
         return
     teks = pytesseract.image_to_string(siapkan(img), lang=bahasa)
     nomor, uraian = ekstrak(teks)
+    st.session_state.setdefault("teks_ocr", {})
+    st.session_state.teks_ocr[nama] = teks
     st.session_state.baris.append([nomor, uraian, nama])
     st.session_state.sudah.add(nama)
 
@@ -161,6 +170,13 @@ with tab2:
     foto = st.camera_input("Foto dokumen (lurus, cahaya cukup)")
     if foto:
         proses(f"kamera_{foto.file_id}", Image.open(foto))
+
+tampilkan_ocr = st.checkbox("Tampilkan hasil OCR mentah (untuk cek)")
+if tampilkan_ocr and st.session_state.baris:
+    st.session_state.setdefault("teks_ocr", {})
+    for sumber, t_ocr in st.session_state.teks_ocr.items():
+        with st.expander(f"Teks OCR: {sumber}"):
+            st.text(t_ocr)
 
 st.subheader("Hasil (periksa dan koreksi sebelum diekspor)")
 df = pd.DataFrame(st.session_state.baris, columns=["Nomor Arsip", "Uraian Arsip", "Sumber"])
