@@ -109,7 +109,7 @@ def ekstrak(teks):
         m = re.search(pola_nomor, teks)
         if m:
             nomor = m.group(0).strip()
-   uraian = ""
+    uraian = ""
     cocok_uraian = list(
         re.finditer(
             r"\bura[il]an\b[^\S\r\n]*[:\-=.]?[^\S\r\n]*(.+?)(?=\n\s*\n|\n\s*(?:•|\*|catatan|semua\s+bukti|kebenaran\s+perhitungan|jakarta,|a\.n\.|nip\.|233\s+\d+)\b|\Z)",
