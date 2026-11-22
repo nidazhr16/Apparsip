@@ -109,22 +109,18 @@ def ekstrak(teks):
         m = re.search(pola_nomor, teks)
         if m:
             nomor = m.group(0).strip()
-    uraian = ""
-    m = re.search(
-        r"\b(?:uraian(?:\s+informasi)?|perihal|hal|tentang|pokok\s+masalah|isi\s+ringkas)\s*[:\-=.]?\s*(.+?)(?=\n\s*\n|\n\s*(?:nomor|tanggal|lampiran|kepada|yth|tembusan)\b|\Z)",
-        teks,
-        re.I | re.S,
+   uraian = ""
+    cocok_uraian = list(
+        re.finditer(
+            r"\bura[il]an\b[^\S\r\n]*[:\-=.]?[^\S\r\n]*(.+?)(?=\n\s*\n|\n\s*(?:•|\*|catatan|semua\s+bukti|kebenaran\s+perhitungan|jakarta,|a\.n\.|nip\.|233\s+\d+)\b|\Z)",
+            teks,
+            re.I | re.S,
+        )
     )
-    if m:
-        uraian = " ".join(m.group(1).split())
-    else:
-        baris_bersih = [
-            " ".join(b.split())
-            for b in teks.splitlines()
-            if len(" ".join(b.split())) >= 25
-        ]
-        if baris_bersih:
-            uraian = " ".join(baris_bersih[:2])
+    if cocok_uraian:
+        teks_uraian = cocok_uraian[-1].group(1).strip()
+        teks_uraian = re.sub(r"^[:\-=.\s]+", "", teks_uraian)
+        uraian = " ".join(teks_uraian.split())
     return nomor, uraian
 
 
