@@ -7,6 +7,8 @@ Cara pakai:
 """
 import io
 import re
+import platform
+import shutil
 
 import pandas as pd
 import pytesseract
@@ -20,10 +22,15 @@ st.title("Pemindai Arsip → Excel")
 
 with st.sidebar:
     st.header("Pengaturan")
-    path_tesseract = st.text_input(
-        "Lokasi tesseract.exe (Windows, kosongkan jika sudah di PATH)",
-        r"C:\Program Files\Tesseract-OCR\tesseract.exe",
+    default_tesseract = (
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+        if platform.system() == "Windows"
+        else (shutil.which("tesseract") or "tesseract")
     )
+    path_tesseract = st.text_input(
+        "Lokasi tesseract (kosongkan jika sudah di PATH)",
+        default_tesseract,
+    ).strip()
     bahasa = st.text_input("Bahasa OCR", "ind+eng")
     pola_nomor = st.text_input(
         "Pola nomor arsip (regex)",
@@ -32,8 +39,7 @@ with st.sidebar:
     )
     excel_lama = st.file_uploader("Excel tujuan (opsional, data ditambahkan di bawahnya)", type=["xlsx"])
 
-if path_tesseract:
-    pytesseract.pytesseract.tesseract_cmd = path_tesseract
+pytesseract.pytesseract.tesseract_cmd = path_tesseract or "tesseract"
 
 st.session_state.setdefault("baris", [])
 st.session_state.setdefault("sudah", set())
