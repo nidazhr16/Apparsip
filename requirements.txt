@@ -1,5 +1,7 @@
-streamlit
-pandas
-numpy
-scikit-learn
-pytesseract
+streamlit 
+pytesseract 
+pillow 
+pandas 
+openpyxl 
+pymupdf 
+opencv-python-headless
