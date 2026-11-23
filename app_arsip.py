@@ -111,26 +111,34 @@ def ekstrak(teks):
             nomor = m.group(0).strip()
 
     uraian = ""
-    cocok_uraian = list(
-        re.finditer(
-            r"(?:^|\n)[^\n]*\bur[aei]i?[aeil]n\b[^\n]*(?:\n[^\n]*){0,5}",
-            teks,
-            re.I,
-        )
+    # 1. Cari langsung blok isi uraian SPM (biasanya diawali ": Pembayaran..." setelah blok Rekening/Bank/Pos)
+    m_spm = re.search(
+        r"(?:^|\n)\s*[:\-=]\s*((?:pembayaran|pencairan|pengajuan|belanja|pertanggungjawaban)\b.+?)(?=\n\s*(?:•|\*|catatan|semua\s+bukti|kebenaran\s+perhitungan|jakarta[,\s]|a\.n\.|kuasa\s+pengguna|pejabat\s+penandatangan|nip\.?|233\s+\d+)\b|\Z)",
+        teks,
+        re.I | re.S,
     )
-    if cocok_uraian:
-        potongan = cocok_uraian[-1].group(0)
-        # Hapus bagian label sebelum/pada kata uraian sampai tanda pemisah (: atau -) atau spasi panjang
-        potongan = re.sub(r"^.*?ur[aei]i?[aeil]n\b[^\n:;\-=]*[:;\-=]?\s*", "", potongan, flags=re.I | re.S)
-        # Hentikan jika sudah masuk catatan kaki / tanda tangan / NIP di bagian bawah dokumen SPM
-        potongan = re.split(
-            r"\n\s*(?:[•\*\-]\s*)?(?:semua\s+bukti|kebenaran\s+perhitungan|jakarta[,\s]|a\.n\.|kuasa\s+pengguna|pejabat\s+penandatangan|nip\.?|233\s+\d+)\b",
-            potongan,
-            maxsplit=1,
-            flags=re.I,
-        )[0]
-        potongan = re.sub(r"^[\s:=\-–—.]+", "", potongan)
-        uraian = " ".join(potongan.split())
+    if m_spm:
+        uraian = " ".join(m_spm.group(1).split())
+    else:
+        # 2. Fallback jika label "Uraian" berada sejajar dengan isinya
+        cocok_uraian = list(
+            re.finditer(
+                r"\bura[il1]an\b[^\n]*(?:\n[^\n]*){0,8}",
+                teks,
+                re.I,
+            )
+        )
+        if cocok_uraian:
+            potongan = cocok_uraian[-1].group(0)
+            potongan = re.sub(r"^\s*ura[il1]an\b", "", potongan, flags=re.I)
+            potongan = re.split(
+                r"\n\s*(?:[•\*\-]\s*)?(?:semua\s+bukti|kebenaran\s+perhitungan|jakarta[,\s]|a\.n\.|kuasa\s+pengguna|pejabat\s+penandatangan|nip\.?|233\s+\d+)\b",
+                potongan,
+                maxsplit=1,
+                flags=re.I,
+            )[0]
+            potongan = re.sub(r"^[\s:=\-–—.]+", "", potongan)
+            uraian = " ".join(potongan.split())
     return nomor, uraian
 
 def halaman(f):
