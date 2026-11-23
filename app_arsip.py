@@ -102,13 +102,17 @@ def siapkan(img):
 
 def ekstrak(teks):
     nomor = ""
-    m = re.search(r"\bno(?:mor)?\.?\s*(?:arsip|surat|berkas|spm)?\s*[:\-]\s*(\S+)", teks, re.I)
+    m = re.search(
+        r"\bno(?:mor)?\.?\s*(?:arsip|surat|berkas|spm)?\s*[:\-]\s*([A-Za-z0-9./\-]+(?:\s*/\s*[A-Za-z0-9./\-]+)+|[A-Za-z0-9./\-]+)",
+        teks,
+        re.I,
+    )
     if m:
-        nomor = m.group(1).strip()
+        nomor = re.sub(r"\s*/\s*", "/", m.group(1).strip())
     else:
         m = re.search(pola_nomor, teks)
         if m:
-            nomor = m.group(0).strip()
+            nomor = re.sub(r"\s*/\s*", "/", m.group(0).strip())
     uraian = ""
     # 1. Cari langsung blok isi uraian SPM (biasanya diawali ": Pembayaran..." setelah blok Rekening/Bank/Pos)
     m_spm = re.search(
