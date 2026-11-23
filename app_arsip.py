@@ -109,7 +109,6 @@ def ekstrak(teks):
         m = re.search(pola_nomor, teks)
         if m:
             nomor = m.group(0).strip()
-
     uraian = ""
     # 1. Cari langsung blok isi uraian SPM (biasanya diawali ": Pembayaran..." setelah blok Rekening/Bank/Pos)
     m_spm = re.search(
